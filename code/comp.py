@@ -2,7 +2,7 @@ import numpy as np
 import cv, bic
 from mse import *
 
-def compare_models(n, dgp_ar, m, datasets, holdout=0):
+def compare_models(n, dgp_ar, m, datasets, holdout=0, delta=0.5):
     '''
     # This function compares sum of squared errors (sse) from competing models. Returns the number of the model selected by each procedure.
     # If testing prediction on a holdout set, this function instead returns the sse for the model selected by each procedure.
@@ -32,7 +32,7 @@ def compare_models(n, dgp_ar, m, datasets, holdout=0):
     
     for i in range(m):
         x = np.concatenate([xs[j].reshape((n-holdout-holdout_buffer-p, -1)) for j in range(i+1)], axis=1)
-        cv_ = cv.cv(x, y, n-holdout-holdout_buffer, p)
+        cv_ = cv.cv(x, y, n-holdout-holdout_buffer, p, delta)
         
         vblock_equal[i]    = cv_[0]
         vblock_unequal[i]  = cv_[1]
