@@ -4,6 +4,9 @@ import sys
 # Cross Validation Function
 def cv(x, y, n, p):
     '''
+    This function takes x data, y data, the sample size (n), and an indicator of whether autoregressive models are being used (p).
+    It executes the four cross-validation procedures: v-block equal, v-block unequal, hv-block equal, and hv-block unequal.
+    Returns the mean squared error (mse) of each procedure.
     '''
 
     nc = int(n**0.5)
