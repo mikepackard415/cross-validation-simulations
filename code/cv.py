@@ -2,14 +2,15 @@ from mse import *
 import sys
 
 # Cross Validation Function
-def cv(x, y, n, p):
+def cv(x, y, n, p, delta=0.5):
     '''
     This function takes x data, y data, the sample size (n), and an indicator of whether autoregressive models are being used (p).
+    It also takes delta, which indicates the exponent (<1) used to get the estimation size.
     It executes the four cross-validation procedures: v-block equal, v-block unequal, hv-block equal, and hv-block unequal.
     Returns the mean squared error (mse) of each procedure.
     '''
 
-    nc = int(n**0.5)
+    nc = int(n**delta)
     nv = (n-nc) * ((n-nc) % 2==1) + (n-nc+1) * ((n-nc)%2==0) # Always odd
     if p >= n-nv:
         sys.exit('ERROR: Number of models is too large.')
