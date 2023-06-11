@@ -26,7 +26,7 @@ m = 5
 procedures = ["vblock equal", "vblock unequal", "hvblock equal", "hvblock unequal", "bic"]
 
 ## Export location - if it is preferable to print results in console, set location = ''
-location = "CV Simulations (12.22.2021).xlsx"
+location = "CV Simulations - Model Selection.xlsx"
 
 ## Run simulations
 def sim(sims, sizes, tables, procedures, models=5, loc=''):
