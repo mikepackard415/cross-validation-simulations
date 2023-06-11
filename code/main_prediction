@@ -1,0 +1,93 @@
+import numpy as np
+import time
+import dgp, comp, export
+
+np.random.seed(3291995)
+
+## Data-generating processes and beta values
+table1 = ["Static i.i.d.",    dgp.dgp_static_iid, [1,   1,    1   ]]
+table2 = ["Static AR errors", dgp.dgp_static_ar,  [1,   1,    1   ]]
+table3 = ["AR 0.7-0.15-0.1",  dgp.dgp_ar,         [0.7, 0.15, 0.1 ]]
+table4 = ["AR 0.4-0.3-0.25",  dgp.dgp_ar,         [0.4, 0.3,  0.25]]
+
+paper = [table1 , table2, table3, table4] 
+
+## Number of simulations
+sims = 2000
+
+## Sample sizes
+sizes = [100, 200]
+
+## Number of Models (min:3, default:5, max: determined by vblock equal and the sample size)
+## Note that the 'correct' model will be #3 unless editing is done in the dgp functions.
+m = 5
+
+## Number of procedures: 5 (v-block equal, hv-block equal, v-block unequal, hv-block unequal, BIC)
+procedures = ["vblock equal", "vblock unequal", "hvblock equal", "hvblock unequal", "bic"]
+
+## Export location - if it is preferable to print results in console, set location = ''
+location_a = "CV Simulations - Prediction (delta=0.5).xlsx"
+location_b = "CV Simulations - Prediction (delta=0.75).xlsx"
+
+## Run simulations
+def sim(sims, sizes, tables, procedures, models=5, loc='', delta=0.5):
+    '''
+    Function to run the simulation. In each iteration, data is generated
+    according to a specific data-generating process (DGP) and a specific
+    sample size. Then, each of the procedures selects the best-fitting model
+    from among a specified number of alternatives. This is repeated a specified
+    number of times for each combination of DGP and sample size, and the
+    results are organized and exported to excel.
+
+    Inputs:
+        sims (int): The number of iterations to run.
+        sizes (list): The sample sizes to use.
+        tables (list of lists): The names, functions, and parameters for DGPs.
+        procedures (list): The names of the fitting procedures.
+        loc (str): The filepath where the .xlsx file will be saved.
+        models (int): The number of models to consider (default 5).
+        delta (float): The exponent used to select the size of the estimation sample.
+    '''
+    t0 = time.time()
+
+    D = np.empty((len(tables), len(sizes), len(procedures), models))
+    
+    for i, info in enumerate(tables):
+        name, dgp, params = info
+
+        for j, size in enumerate(sizes):
+
+            # Print progress updates
+            print('{}, sample size:{}'.format(name, size))
+
+            # For each iteration: create data, compare models, store results
+            A=np.empty((sims, len(procedures)), dtype=int)
+            for sim in range(sims):
+                datasets = dgp(size, params, models)
+                A[sim] = comp.compare_models(size, name[:2]=="AR", models, datasets, delta)
+            
+            # Reorganize results, divide number of selections by iterations
+            B=np.stack((A[:]), axis=1)
+            C=np.empty((len(procedures), models))
+            for proc in range(len(procedures)):
+                for m in range(models):
+                    C[proc][m]=sum(1 for x in B[proc] if x == m + 1) / sims
+
+            D[i][j] = C
+
+    # Export results and print execution time
+    export.exp(sims, tables, sizes, procedures, models, D, loc)
+    
+    # Print execution time
+    td = time.time() - t0
+    print(td)
+    h = td // 3600
+    m = (td % 3600) // 60
+    s = ((td % 3600) % 60) // 1
+    print("Execution time: {} hours, {} minutes, {} seconds".format(h, m, s))
+
+if m<3:
+    print('ERROR: Number of models must be at least 3')
+else:
+    sim(sims, sizes, paper, procedures, m, location_a, delta=0.5)
+    sim(sims, sizes, paper, procedures, m, location_b, delta=0.75)
