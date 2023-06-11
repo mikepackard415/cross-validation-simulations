@@ -2,12 +2,16 @@ import numpy as np
 import pandas as pd
 
 # Export results
-def exp(sims, tables, sizes, procedures, models, D, loc):
+def exp(sims, tables, sizes, procedures, models, D, loc, holdout):
 
     columns=["Model 1","Model 2","Model 3"]
     for i in range(models-3):
         j=str(i+4)
         columns.append("Model " + j)
+    
+    if holdout:
+        columns=['Average MSE']
+        models=1
     
     dgp_col = []
     for t in tables:
@@ -18,6 +22,7 @@ def exp(sims, tables, sizes, procedures, models, D, loc):
         #j = str(i)
         for _ in procedures:
             sizes_col.append(i)
+
     sizes_col=sizes_col * len(tables)
     
     procs_col = procedures * len(tables) * len(sizes)
