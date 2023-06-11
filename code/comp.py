@@ -2,7 +2,7 @@ import numpy as np
 import cv, bic
 from mse import *
 
-def compare_models(n, dgp_ar, m, datasets):
+def compare_models(n, dgp_ar, m, datasets, holdout=0):
     '''
     # This function compares sum of squared errors (sse) from competing models. Returns the number of the model selected by each procedure.
     # If testing prediction on a holdout set, this function instead returns the sse for the model selected by each procedure.
